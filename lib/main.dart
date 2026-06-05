@@ -1,86 +1,97 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'app/locations.dart';
+import 'app/services.dart';
+import 'app/theme.dart';
 import 'models/quote_request.dart';
+import 'services/admin_bootstrap.dart';
+import 'services/quote_lead_repository.dart';
+import 'widgets/location_picker.dart';
+import 'screens/account/account_screen.dart';
+import 'screens/auth/email_verification_screen.dart';
+import 'screens/complaint/fault_report_screen.dart';
+import 'services/auth_service.dart';
+import 'services/complaint_repository.dart';
+import 'services/firebase_bootstrap.dart';
 import 'services/firebase_quote_repository.dart';
 import 'services/quote_repository.dart';
-
-const appPrimary = Color(0xFF103B2F);
-const appAccent = Color(0xFFE8A33B);
-const appBackground = Color(0xFFF5F8F4);
-const appMuted = Color(0xFF62736B);
-const appBlue = Color(0xFF1780CC);
-const appWhatsApp = Color(0xFF1FA463);
+import 'services/sale_repository.dart';
+import 'services/storage_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final firebaseReady = await FirebaseBootstrap.ensureInitialized();
   final quoteRepository = await QuoteRepositoryFactory.create();
-  runApp(CamliDogalgazApp(quoteRepository: quoteRepository));
+  final firestore = firebaseReady ? FirebaseFirestore.instance : null;
+  final auth = firebaseReady ? FirebaseAuth.instance : null;
+  if (firebaseReady && auth != null && firestore != null) {
+    await AdminBootstrap.ensureAdminAccount(auth: auth, firestore: firestore);
+  }
+  final services = AppServices(
+    quoteRepository: quoteRepository,
+    authService: AuthService(auth: auth, firestore: firestore),
+    complaintRepository: ComplaintRepository(firestore: firestore),
+    quoteLeadRepository: QuoteLeadRepository(firestore: firestore),
+    saleRepository: SaleRepository(firestore: firestore),
+    storageService: StorageService(
+      storage: firebaseReady ? FirebaseStorage.instance : null,
+    ),
+  );
+  runApp(CamliDogalgazApp(services: services));
 }
 
 class CamliDogalgazApp extends StatelessWidget {
   const CamliDogalgazApp({
     super.key,
-    required this.quoteRepository,
+    required this.services,
   });
 
-  final QuoteRepository quoteRepository;
+  final AppServices services;
 
   @override
   Widget build(BuildContext context) {
-    final base = ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: appPrimary,
-        primary: appPrimary,
-        secondary: appAccent,
-        surface: Colors.white,
-      ),
-    );
+    final theme = buildAppTheme();
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Çamlı Doğalgaz',
-      theme: base.copyWith(
-        scaffoldBackgroundColor: appBackground,
-        textTheme: GoogleFonts.manropeTextTheme(base.textTheme),
-        appBarTheme: AppBarTheme(
-          backgroundColor: appBackground,
-          foregroundColor: appPrimary,
-          elevation: 0,
+      themeMode: ThemeMode.dark,
+      theme: theme.copyWith(
+        textTheme: GoogleFonts.manropeTextTheme(theme.textTheme),
+        appBarTheme: theme.appBarTheme.copyWith(
           titleTextStyle: GoogleFonts.manrope(
-            color: appPrimary,
+            color: const Color(0xFFE8F0EC),
             fontWeight: FontWeight.w800,
             fontSize: 18,
           ),
         ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: appPrimary.withValues(alpha: 0.08)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: appPrimary.withValues(alpha: 0.08)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: const BorderSide(color: appPrimary, width: 1.4),
-          ),
-        ),
-        cardTheme: CardThemeData(
-          color: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-            side: BorderSide(color: appPrimary.withValues(alpha: 0.08)),
-          ),
-        ),
       ),
-      home: MainShell(quoteRepository: quoteRepository),
+      home: AppRoot(services: services),
+    );
+  }
+}
+
+class AppRoot extends StatelessWidget {
+  const AppRoot({super.key, required this.services});
+
+  final AppServices services;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: services.authService.authStateChanges,
+      builder: (context, snapshot) {
+        final user = services.authService.currentUser;
+        if (user != null && !services.authService.isEmailVerified) {
+          return EmailVerificationScreen(services: services);
+        }
+        return MainShell(services: services);
+      },
     );
   }
 }
@@ -88,10 +99,10 @@ class CamliDogalgazApp extends StatelessWidget {
 class MainShell extends StatefulWidget {
   const MainShell({
     super.key,
-    required this.quoteRepository,
+    required this.services,
   });
 
-  final QuoteRepository quoteRepository;
+  final AppServices services;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -129,55 +140,59 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomeScreen(onNavigateToQuote: () => _goToPage(2)),
       const ServicesScreen(),
-      QuoteScreen(quoteRepository: widget.quoteRepository),
+      FaultReportScreen(services: widget.services),
+      QuoteScreen(
+        quoteRepository: widget.services.quoteRepository,
+        services: widget.services,
+      ),
       const TrustScreen(),
+      AccountScreen(services: widget.services),
     ];
 
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 16,
         title: const BrandTitle(),
-        actions: [
-          IconButton(
-            tooltip: 'Ara',
-            onPressed: () => AppLauncher.call(context),
-            icon: const Icon(Icons.call_outlined),
+      ),
+      body: Column(
+        children: [
+          if (!widget.services.authService.isReady)
+            MaterialBanner(
+              content: const Text(
+                'Linux masaüstünde giriş ve takip için Chrome sürümünü kullanın.',
+              ),
+              leading: const Icon(Icons.info_outline, color: appBlue),
+              actions: [
+                TextButton(
+                  onPressed: () =>
+                      ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                  child: const Text('Tamam'),
+                ),
+              ],
+            ),
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) => setState(() => _currentIndex = index),
+              children: pages,
+            ),
           ),
-          IconButton(
-            tooltip: 'WhatsApp',
-            onPressed: () => AppLauncher.whatsApp(context),
-            icon: const Icon(Icons.chat_bubble_outline_rounded),
-          ),
-          const SizedBox(width: 8),
         ],
-      ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) => setState(() => _currentIndex = index),
-        children: pages,
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => AppLauncher.whatsApp(context),
-        backgroundColor: appWhatsApp,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.forum_outlined),
-        label: const Text('WhatsApp'),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: _goToPage,
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Ana Sayfa',
-          ),
-          NavigationDestination(
             icon: Icon(Icons.plumbing_outlined),
             selectedIcon: Icon(Icons.plumbing),
             label: 'Hizmetler',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.build_circle_outlined),
+            selectedIcon: Icon(Icons.build_circle),
+            label: 'Arıza',
           ),
           NavigationDestination(
             icon: Icon(Icons.request_quote_outlined),
@@ -188,6 +203,11 @@ class _MainShellState extends State<MainShell> {
             icon: Icon(Icons.verified_user_outlined),
             selectedIcon: Icon(Icons.verified_user),
             label: 'Güven',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Hesabım',
           ),
         ],
       ),
@@ -283,21 +303,26 @@ class ServicesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        const IntroCard(
-          eyebrow: 'Hizmet Detayları',
-          title: 'Tüm hizmetleri mobilde daha okunur hale getirdik.',
-          description:
-              'Her kartta hem hizmet özeti hem de hangi durumlarda tercih edilmesi gerektiği var.',
+        Text(
+          'Hizmetler',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Maraş ve yakın illerde sunduğumuz hizmetler.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: appMuted),
         ),
         const SizedBox(height: 18),
         ...services.map(
-              (service) => Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: DetailedServiceCard(service: service),
-              ),
-            ),
+          (service) => Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: DetailedServiceCard(service: service),
+          ),
+        ),
       ],
     );
   }
@@ -307,9 +332,11 @@ class QuoteScreen extends StatefulWidget {
   const QuoteScreen({
     super.key,
     required this.quoteRepository,
+    required this.services,
   });
 
   final QuoteRepository quoteRepository;
+  final AppServices services;
 
   @override
   State<QuoteScreen> createState() => _QuoteScreenState();
@@ -319,20 +346,30 @@ class _QuoteScreenState extends State<QuoteScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _locationController = TextEditingController();
+  final _unitCountController = TextEditingController(text: '1');
   final _noteController = TextEditingController();
 
   String _service = services.first.title;
   String _propertyType = 'Daire';
   String _urgency = 'Bu hafta içinde';
-  String _contactPreference = 'WhatsApp';
+  String _province = marasProvince;
+  String _district = marasDistricts.first;
   bool _isSubmitting = false;
+
+  bool get _showUnitCount =>
+      requiresBulkUnits(
+        province: _province,
+        propertyType: _propertyType,
+        service: _service,
+      ) ||
+      _propertyType == 'Apartman / blok' ||
+      _service == 'Toplu Blok İşleri';
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _locationController.dispose();
+    _unitCountController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -342,18 +379,33 @@ class _QuoteScreenState extends State<QuoteScreen> {
       return;
     }
 
+    final unitCount = int.tryParse(_unitCountController.text.trim()) ?? 1;
+    final bulkError = QuoteRequest.validateBulkRule(
+      province: _province,
+      propertyType: _propertyType,
+      service: _service,
+      unitCount: unitCount,
+    );
+    if (bulkError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(bulkError)));
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     final request = QuoteRequest(
       fullName: _nameController.text.trim(),
       phone: _phoneController.text.trim(),
-      location: _locationController.text.trim(),
+      province: _province,
+      district: _province == marasProvince ? _district : '',
+      location: formatLocation(_province, _district),
       service: _service,
       propertyType: _propertyType,
+      unitCount: unitCount,
       urgency: _urgency,
-      contactPreference: _contactPreference,
       note: _noteController.text.trim(),
       submittedAt: DateTime.now(),
+      userId: widget.services.authService.currentUser?.uid ?? '',
     );
 
     final result = await widget.quoteRepository.submitQuote(request);
@@ -362,31 +414,17 @@ class _QuoteScreenState extends State<QuoteScreen> {
       return;
     }
 
-    setState(() {
-      _isSubmitting = false;
-    });
-
-    await AppLauncher.whatsApp(
-      context,
-      customMessage: request.toWhatsAppMessage(
-        leadId: result.leadId,
-        storedInCloud: result.storedInCloud,
-      ),
+    setState(() => _isSubmitting = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result.userMessage)),
     );
-
-    if (!mounted) {
-      return;
-    }
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(result.userMessage)));
+    _noteController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
         Card(
           child: Padding(
@@ -397,50 +435,45 @@ class _QuoteScreenState extends State<QuoteScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ön fiyat formu',
+                    'Teklif Talebi',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Talebiniz admin paneline düşer, cevap uygulama üzerinden gelir.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: appMuted),
+                  ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _nameController,
-                    textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
                       labelText: 'Ad soyad',
                       prefixIcon: Icon(Icons.person_outline),
                     ),
-                    validator:
-                        (value) => value == null || value.trim().isEmpty
-                            ? 'Ad soyad giriniz.'
-                            : null,
+                    validator: (value) =>
+                        value == null || value.trim().isEmpty ? 'Ad soyad giriniz.' : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
-                    textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
                       labelText: 'Telefon',
                       prefixIcon: Icon(Icons.phone_outlined),
                     ),
-                    validator:
-                        (value) => value == null || value.trim().length < 10
+                    validator: (value) =>
+                        value == null || value.trim().length < 10
                             ? 'Geçerli telefon giriniz.'
                             : null,
                   ),
                   const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _locationController,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'İl / ilçe',
-                      prefixIcon: Icon(Icons.location_on_outlined),
-                    ),
-                    validator:
-                        (value) => value == null || value.trim().isEmpty
-                            ? 'Konum giriniz.'
-                            : null,
+                  LocationPicker(
+                    province: _province,
+                    district: _district,
+                    onProvinceChanged: (value) => setState(() => _province = value),
+                    onDistrictChanged: (value) => setState(() => _district = value),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
@@ -449,18 +482,15 @@ class _QuoteScreenState extends State<QuoteScreen> {
                       labelText: 'Hizmet',
                       prefixIcon: Icon(Icons.handyman_outlined),
                     ),
-                    items:
-                        services
-                            .map(
-                              (service) => DropdownMenuItem(
-                                value: service.title,
-                                child: Text(service.title),
-                              ),
-                            )
-                            .toList(),
-                    onChanged:
-                        (value) =>
-                            setState(() => _service = value ?? _service),
+                    items: services
+                        .map(
+                          (service) => DropdownMenuItem(
+                            value: service.title,
+                            child: Text(service.title),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) => setState(() => _service = value ?? _service),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
@@ -471,21 +501,37 @@ class _QuoteScreenState extends State<QuoteScreen> {
                     ),
                     items: const [
                       DropdownMenuItem(value: 'Daire', child: Text('Daire')),
-                      DropdownMenuItem(
-                        value: 'Müstakil ev',
-                        child: Text('Müstakil ev'),
-                      ),
+                      DropdownMenuItem(value: 'Müstakil ev', child: Text('Müstakil ev')),
                       DropdownMenuItem(value: 'Is yeri', child: Text('Is yeri')),
                       DropdownMenuItem(
                         value: 'Apartman / blok',
                         child: Text('Apartman / blok'),
                       ),
                     ],
-                    onChanged:
-                        (value) => setState(
-                          () => _propertyType = value ?? _propertyType,
-                        ),
+                    onChanged: (value) =>
+                        setState(() => _propertyType = value ?? _propertyType),
                   ),
+                  if (_showUnitCount) ...[
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _unitCountController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Daire / bölüm sayısı',
+                        prefixIcon: const Icon(Icons.numbers_outlined),
+                        helperText: isNearbyProvince(_province)
+                            ? 'Yakın illerde minimum $minNearbyBulkUnits daire'
+                            : null,
+                      ),
+                      validator: (value) {
+                        final count = int.tryParse(value?.trim() ?? '');
+                        if (count == null || count < 1) {
+                          return 'Geçerli daire sayısı giriniz.';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: _urgency,
@@ -494,49 +540,15 @@ class _QuoteScreenState extends State<QuoteScreen> {
                       prefixIcon: Icon(Icons.schedule_outlined),
                     ),
                     items: const [
-                      DropdownMenuItem(
-                        value: 'Bugün mümkünse',
-                        child: Text('Bugün mümkünse'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Bu hafta içinde',
-                        child: Text('Bu hafta içinde'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Bu ay içinde',
-                        child: Text('Bu ay içinde'),
-                      ),
+                      DropdownMenuItem(value: 'Bugün mümkünse', child: Text('Bugün mümkünse')),
+                      DropdownMenuItem(value: 'Bu hafta içinde', child: Text('Bu hafta içinde')),
+                      DropdownMenuItem(value: 'Bu ay içinde', child: Text('Bu ay içinde')),
                       DropdownMenuItem(
                         value: 'Sadece bilgi almak istiyorum',
                         child: Text('Sadece bilgi almak istiyorum'),
                       ),
                     ],
-                    onChanged:
-                        (value) =>
-                            setState(() => _urgency = value ?? _urgency),
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _contactPreference,
-                    decoration: const InputDecoration(
-                      labelText: 'İletişim tercihi',
-                      prefixIcon: Icon(Icons.chat_outlined),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'WhatsApp',
-                        child: Text('WhatsApp'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Telefonla arama',
-                        child: Text('Telefonla arama'),
-                      ),
-                    ],
-                    onChanged:
-                        (value) => setState(
-                          () =>
-                              _contactPreference = value ?? _contactPreference,
-                        ),
+                    onChanged: (value) => setState(() => _urgency = value ?? _urgency),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -545,8 +557,6 @@ class _QuoteScreenState extends State<QuoteScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Ek not',
                       alignLabelWithHint: true,
-                      hintText:
-                          'Örneğin peteklerin yarısı ısınmıyor, eski kombi değişecek, blok projesi var...',
                       prefixIcon: Icon(Icons.notes_outlined),
                     ),
                   ),
@@ -558,35 +568,16 @@ class _QuoteScreenState extends State<QuoteScreen> {
                       style: FilledButton.styleFrom(
                         backgroundColor: appAccent,
                         foregroundColor: const Color(0xFF1F2019),
-                        minimumSize: const Size.fromHeight(56),
+                        minimumSize: const Size.fromHeight(52),
                       ),
-                      icon:
-                          _isSubmitting
-                              ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Icon(Icons.send_outlined),
-                      label: Text(
-                        _isSubmitting
-                            ? 'Kayıt gönderiliyor...'
-                            : 'Kaydet ve WhatsApp ile teklif iste',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => AppLauncher.call(context),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(56),
-                      ),
-                      icon: const Icon(Icons.call_outlined),
-                      label: const Text('Telefonla hızlı ulaş'),
+                      icon: _isSubmitting
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.send_outlined),
+                      label: Text(_isSubmitting ? 'Gönderiliyor...' : 'Teklifi Gönder'),
                     ),
                   ),
                 ],
@@ -594,8 +585,6 @@ class _QuoteScreenState extends State<QuoteScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        const HelpfulInfoCard(),
       ],
     );
   }
@@ -607,7 +596,7 @@ class TrustScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
         const IntroCard(
           eyebrow: 'Neden Biz?',
@@ -663,23 +652,13 @@ class BrandTitle extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 42,
-          height: 42,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            image: const DecorationImage(
-              image: NetworkImage(AppContact.logoUrl),
-              fit: BoxFit.contain,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: appPrimary.withValues(alpha: 0.10),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
+            color: appPrimary.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(12),
           ),
+          child: const Icon(Icons.local_fire_department, color: appPrimary),
         ),
         const SizedBox(width: 12),
         Column(
@@ -687,12 +666,12 @@ class BrandTitle extends StatelessWidget {
           children: [
             Text(
               'Çamlı Doğalgaz',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
             Text(
-              'Mobil hizmet ve teklif merkezi',
+              'Servis Uygulaması',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: appMuted,
                 fontWeight: FontWeight.w700,
@@ -1162,11 +1141,20 @@ class DetailedServiceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.network(
-            service.imageUrl,
-            height: 180,
+          Container(
+            height: 88,
             width: double.infinity,
-            fit: BoxFit.cover,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  appPrimary.withValues(alpha: 0.28),
+                  appSurface,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Icon(service.icon, color: appPrimary, size: 36),
           ),
           Padding(
             padding: const EdgeInsets.all(20),
@@ -1178,7 +1166,7 @@ class DetailedServiceCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0x14103B2F),
+                        color: appPrimary.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(service.icon, color: appPrimary),
@@ -1821,16 +1809,15 @@ const services = [
   ),
   ServiceItem(
     title: 'Toplu Blok İşleri',
-    summary: 'Apartman ve çoklu bölüm projelerinde planlı saha yönetimi.',
+    summary: 'Maraş ve yakın illerde çoklu konut projeleri.',
     description:
-        'Blok ve çoklu bağımsız bölüm projelerinde krostik hat planı, koordineli ekip akışı ve kontrollü teslim çizgisi ön plana çıkar.',
-    imageUrl:
-        'https://images.pexels.com/photos/16832204/pexels-photo-16832204.jpeg?auto=compress&cs=tinysrgb&w=1200',
+        'Kahramanmaraş genelinde tüm ilçelerde hizmet verilir. Gaziantep, Adıyaman, Malatya, Osmaniye, Kilis ve Hatay gibi yakın illerde toplu konut işleri kabul edilir.',
+    imageUrl: '',
     icon: Icons.apartment,
     bullets: [
-      'Katlar ve daireler arası dağılımı daha kontrollü planlar.',
-      'Takibi kolay montaj ve teslim akışı kurar.',
-      'Çevre illerde toplu projelerde de sahada çözüm sunar.',
+      'Maraş merkez ve tüm ilçelerde planlı uygulama.',
+      'Yakın illerde yalnızca 5 daire ve üzeri toplu işler kabul edilir.',
+      'Apartman, blok ve çoklu bağımsız bölüm projelerinde koordineli teslim.',
     ],
   ),
 ];

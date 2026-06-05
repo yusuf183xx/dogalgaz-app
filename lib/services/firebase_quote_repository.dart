@@ -1,17 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 
-import '../firebase_options.dart';
 import '../models/quote_request.dart';
+import 'firebase_bootstrap.dart';
 import 'quote_repository.dart';
 
 class QuoteRepositoryFactory {
   static Future<QuoteRepository> create() async {
     try {
-      if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
+      final ready = await FirebaseBootstrap.ensureInitialized();
+      if (!ready) {
+        throw Exception('Firebase baslatilamadi');
       }
 
       return FirebaseQuoteRepository(FirebaseFirestore.instance);
@@ -43,7 +41,8 @@ class FirebaseQuoteRepository implements QuoteRepository {
     await doc.set({
       ...request.toMap(),
       'leadId': doc.id,
-      'status': 'new',
+      'status': 'bekliyor',
+      'adminNote': '',
       'source': 'flutter_app',
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -52,7 +51,7 @@ class FirebaseQuoteRepository implements QuoteRepository {
       storedInCloud: true,
       leadId: doc.id,
       userMessage:
-          'Teklif Firestore kaydına da düşürüldü. Talep Kimliği: ${doc.id}',
+          'Teklifiniz alındı. Admin ekibimiz inceleyip uygulama üzerinden cevap verecek.',
     );
   }
 }
