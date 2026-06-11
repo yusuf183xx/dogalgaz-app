@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "728108401732",
-    "project_id": "dogalgaz-app",
-    "storage_bucket": "dogalgaz-app.firebasestorage.app"
+    "project_number": "277725838519",
+    "project_id": "dogalgaz-ap",
+    "storage_bucket": "dogalgaz-ap.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:728108401732:android:bf91a19a2c8f821b35a811",
+        "mobilesdk_app_id": "1:277725838519:android:17d68ae6371ce316026132",
         "android_client_info": {
           "package_name": "com.example.dogalgazz"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDeg8rpMc-6zz6_u8RUKwVEYi0IaDBIy8A"
+          "current_key": "AIzaSyBl5X8oT7IejEvMORv2F4XxEzX3snvqnGM"
         }
       ],
       "services": {

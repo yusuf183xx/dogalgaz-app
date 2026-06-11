@@ -106,32 +106,32 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Expanded(
             child: switch (_tabIndex) {
               0 => _ComplaintsTab(
-                  services: widget.services,
-                  statusFilter: _statusFilter,
-                  searchController: _searchController,
-                  onFilterChanged: (status) {
-                    setState(() => _statusFilter = status);
-                  },
-                  onUpdated: _loadReportData,
-                ),
+                services: widget.services,
+                statusFilter: _statusFilter,
+                searchController: _searchController,
+                onFilterChanged: (status) {
+                  setState(() => _statusFilter = status);
+                },
+                onUpdated: _loadReportData,
+              ),
               1 => _QuotesTab(
-                  services: widget.services,
-                  statusFilter: _quoteStatusFilter,
-                  searchController: _quoteSearchController,
-                  onFilterChanged: (status) {
-                    setState(() => _quoteStatusFilter = status);
-                  },
-                ),
+                services: widget.services,
+                statusFilter: _quoteStatusFilter,
+                searchController: _quoteSearchController,
+                onFilterChanged: (status) {
+                  setState(() => _quoteStatusFilter = status);
+                },
+              ),
               2 => _SalesTab(
-                  services: widget.services,
-                  searchController: _saleSearchController,
-                  onAdded: _loadReportData,
-                ),
+                services: widget.services,
+                searchController: _saleSearchController,
+                onAdded: _loadReportData,
+              ),
               _ => _ReportsTab(
-                  statusCounts: _statusCounts,
-                  salesByService: _salesByService,
-                  totalRevenue: _totalRevenue,
-                ),
+                statusCounts: _statusCounts,
+                salesByService: _salesByService,
+                totalRevenue: _totalRevenue,
+              ),
             },
           ),
         ],
@@ -222,7 +222,8 @@ class _ComplaintsTabState extends State<_ComplaintsTab> {
               return ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 itemCount: complaints.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   return _AdminComplaintCard(
                     services: widget.services,
@@ -305,9 +306,9 @@ class _AdminComplaintCardState extends State<_AdminComplaintCard> {
         _pdfName = uploaded.name;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('PDF yüklendi.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('PDF yüklendi.')));
       }
     } finally {
       if (mounted) {
@@ -328,9 +329,9 @@ class _AdminComplaintCardState extends State<_AdminComplaintCard> {
       );
       widget.onUpdated();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Şikayet güncellendi.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Şikayet güncellendi.')));
       }
     } finally {
       if (mounted) {
@@ -366,7 +367,10 @@ class _AdminComplaintCardState extends State<_AdminComplaintCard> {
             const SizedBox(height: 6),
             Text('$dateText • ${complaint.phone} • ${complaint.location}'),
             const SizedBox(height: 8),
-            Text(complaint.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+            Text(
+              complaint.title,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 4),
             Text('Tespit: ${complaint.detectedIssue}'),
             Text('Hizmet: ${complaint.recommendedService}'),
@@ -398,7 +402,8 @@ class _AdminComplaintCardState extends State<_AdminComplaintCard> {
               maxLines: 3,
               decoration: const InputDecoration(
                 labelText: 'Müşteriye görünen açıklama',
-                hintText: 'Reddedildi, beklemede, onaylandı gibi durumları açıklayın...',
+                hintText:
+                    'Reddedildi, beklemede, onaylandı gibi durumları açıklayın...',
               ),
             ),
             const SizedBox(height: 10),
@@ -520,7 +525,8 @@ class _QuotesTabState extends State<_QuotesTab> {
               return ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 itemCount: leads.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   return _AdminQuoteCard(
                     services: widget.services,
@@ -537,10 +543,7 @@ class _QuotesTabState extends State<_QuotesTab> {
 }
 
 class _AdminQuoteCard extends StatefulWidget {
-  const _AdminQuoteCard({
-    required this.services,
-    required this.lead,
-  });
+  const _AdminQuoteCard({required this.services, required this.lead});
 
   final AppServices services;
   final QuoteLead lead;
@@ -576,9 +579,9 @@ class _AdminQuoteCardState extends State<_AdminQuoteCard> {
         adminNote: _noteController.text.trim(),
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Teklif güncellendi.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Teklif güncellendi.')));
       }
     } finally {
       if (mounted) {
@@ -614,8 +617,13 @@ class _AdminQuoteCardState extends State<_AdminQuoteCard> {
             const SizedBox(height: 6),
             Text('$dateText • ${lead.phone} • ${lead.location}'),
             const SizedBox(height: 8),
-            Text(lead.service, style: const TextStyle(fontWeight: FontWeight.w700)),
-            Text('${lead.propertyType} • ${lead.unitCount} birim • ${lead.urgency}'),
+            Text(
+              lead.service,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            Text(
+              '${lead.propertyType} • ${lead.unitCount} birim • ${lead.urgency}',
+            ),
             if (lead.note.isNotEmpty) ...[
               const SizedBox(height: 6),
               Text(lead.note),
@@ -733,9 +741,9 @@ class _SalesTabState extends State<_SalesTab> {
       _noteController.clear();
       widget.onAdded();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Satış kaydedildi.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Satış kaydedildi.')));
       }
     } finally {
       if (mounted) {

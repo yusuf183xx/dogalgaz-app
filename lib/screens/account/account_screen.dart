@@ -51,8 +51,7 @@ class AccountScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    LoginScreen(services: services),
+                                builder: (_) => LoginScreen(services: services),
                               ),
                             );
                           },
@@ -88,8 +87,7 @@ class AccountScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) =>
-                            AdminLoginScreen(services: services),
+                        builder: (_) => AdminLoginScreen(services: services),
                       ),
                     );
                   },
@@ -117,7 +115,10 @@ class AccountScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text(user.email ?? '', style: const TextStyle(color: appMuted)),
+                    Text(
+                      user.email ?? '',
+                      style: const TextStyle(color: appMuted),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -167,8 +168,7 @@ class AccountScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          MyComplaintsScreen(services: services),
+                      builder: (_) => MyComplaintsScreen(services: services),
                     ),
                   );
                 },
@@ -201,8 +201,7 @@ class AccountScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          AdminLoginScreen(services: services),
+                      builder: (_) => AdminLoginScreen(services: services),
                     ),
                   );
                 },

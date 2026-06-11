@@ -22,19 +22,20 @@ class StatusPieChart extends StatelessWidget {
     final sections = ComplaintStatus.values
         .where((status) => (counts[status] ?? 0) > 0)
         .map((status) {
-      final value = (counts[status] ?? 0).toDouble();
-      return PieChartSectionData(
-        value: value,
-        title: '${value.toInt()}',
-        color: _colorFor(status),
-        radius: 58,
-        titleStyle: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w800,
-          fontSize: 12,
-        ),
-      );
-    }).toList();
+          final value = (counts[status] ?? 0).toDouble();
+          return PieChartSectionData(
+            value: value,
+            title: '${value.toInt()}',
+            color: _colorFor(status),
+            radius: 58,
+            titleStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+            ),
+          );
+        })
+        .toList();
 
     return SizedBox(
       height: 240,
@@ -90,9 +91,15 @@ class ServiceBarChart extends StatelessWidget {
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -122,7 +129,9 @@ class ServiceBarChart extends StatelessWidget {
                     toY: entries[i].value,
                     color: appPrimary,
                     width: 18,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(8),
+                    ),
                   ),
                 ],
               ),

@@ -37,8 +37,7 @@ bool requiresBulkUnits({
   if (!isNearbyProvince(province)) {
     return false;
   }
-  return propertyType == 'Apartman / blok' ||
-      service == 'Toplu Blok İşleri';
+  return propertyType == 'Apartman / blok' || service == 'Toplu Blok İşleri';
 }
 
 String formatLocation(String province, String district) {

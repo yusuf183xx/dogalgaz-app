@@ -42,7 +42,9 @@ class SaleRecord {
       'amount': amount,
       'location': location,
       'note': note,
-      'soldAt': soldAt != null ? Timestamp.fromDate(soldAt!) : FieldValue.serverTimestamp(),
+      'soldAt': soldAt != null
+          ? Timestamp.fromDate(soldAt!)
+          : FieldValue.serverTimestamp(),
       'createdBy': createdBy,
       'searchKeywords': [
         customerName.toLowerCase(),

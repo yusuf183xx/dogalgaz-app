@@ -99,7 +99,9 @@ class _FaultReportScreenState extends State<FaultReportScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Şikayetiniz kaydedildi. Durumu takip edebilirsiniz.')),
+        const SnackBar(
+          content: Text('Şikayetiniz kaydedildi. Durumu takip edebilirsiniz.'),
+        ),
       );
 
       Navigator.of(context).push(
@@ -211,15 +213,17 @@ class _FaultReportScreenState extends State<FaultReportScreen> {
                     ),
                     validator: (value) =>
                         value == null || value.trim().length < 10
-                            ? 'Geçerli telefon giriniz.'
-                            : null,
+                        ? 'Geçerli telefon giriniz.'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   LocationPicker(
                     province: _province,
                     district: _district,
-                    onProvinceChanged: (value) => setState(() => _province = value),
-                    onDistrictChanged: (value) => setState(() => _district = value),
+                    onProvinceChanged: (value) =>
+                        setState(() => _province = value),
+                    onDistrictChanged: (value) =>
+                        setState(() => _district = value),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(

@@ -32,18 +32,24 @@ class MyQuotesScreen extends StatelessWidget {
           final leads = snapshot.data ?? [];
           if (leads.isEmpty) {
             return const Center(
-              child: Text('Henüz teklif kaydınız yok.', style: TextStyle(color: appMuted)),
+              child: Text(
+                'Henüz teklif kaydınız yok.',
+                style: TextStyle(color: appMuted),
+              ),
             );
           }
 
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: leads.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final lead = leads[index];
               final date = lead.createdAt != null
-                  ? DateFormat('dd MMM yyyy HH:mm', 'tr_TR').format(lead.createdAt!)
+                  ? DateFormat(
+                      'dd MMM yyyy HH:mm',
+                      'tr_TR',
+                    ).format(lead.createdAt!)
                   : '-';
 
               return Card(
@@ -57,7 +63,9 @@ class MyQuotesScreen extends StatelessWidget {
                           Expanded(
                             child: Text(
                               lead.service,
-                              style: const TextStyle(fontWeight: FontWeight.w800),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                           StatusBadge(status: lead.status),
@@ -66,7 +74,9 @@ class MyQuotesScreen extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text('$date • ${lead.location}'),
                       const SizedBox(height: 8),
-                      Text('Mülk: ${lead.propertyType} • ${lead.unitCount} birim'),
+                      Text(
+                        'Mülk: ${lead.propertyType} • ${lead.unitCount} birim',
+                      ),
                       if (lead.note.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Text(lead.note),
@@ -83,9 +93,18 @@ class MyQuotesScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Admin cevabı', style: TextStyle(fontWeight: FontWeight.w800)),
+                              const Text(
+                                'Admin cevabı',
+                                style: TextStyle(fontWeight: FontWeight.w800),
+                              ),
                               const SizedBox(height: 6),
-                              Text(lead.adminNote, style: const TextStyle(color: appMuted, height: 1.5)),
+                              Text(
+                                lead.adminNote,
+                                style: const TextStyle(
+                                  color: appMuted,
+                                  height: 1.5,
+                                ),
+                              ),
                             ],
                           ),
                         ),

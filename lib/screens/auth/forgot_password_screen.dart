@@ -104,10 +104,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   labelText: 'E-posta',
                   prefixIcon: Icon(Icons.email_outlined),
                 ),
-                validator: (value) =>
-                    value == null || !value.contains('@')
-                        ? 'Geçerli e-posta giriniz.'
-                        : null,
+                validator: (value) => value == null || !value.contains('@')
+                    ? 'Geçerli e-posta giriniz.'
+                    : null,
                 onFieldSubmitted: (_) => _sendResetEmail(),
               ),
             ),

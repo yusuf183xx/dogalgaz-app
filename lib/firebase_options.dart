@@ -38,41 +38,38 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCaKcPcRXMS-nOrlemCqfQSmHkJcN9OAa0',
-    appId: '1:728108401732:web:a19ff27df4ea8a1035a811',
-    messagingSenderId: '728108401732',
-    projectId: 'dogalgaz-app',
-    authDomain: 'dogalgaz-app.firebaseapp.com',
-    storageBucket: 'dogalgaz-app.firebasestorage.app',
-    measurementId: 'G-3ZKP90SMWL',
+    apiKey: 'AIzaSyBW6vdvzLbpP4LOhTZB6YcquiDci3Qd_aI',
+    appId: '1:277725838519:web:5683923c28baea62026132',
+    messagingSenderId: '277725838519',
+    projectId: 'dogalgaz-ap',
+    authDomain: 'dogalgaz-ap.firebaseapp.com',
+    storageBucket: 'dogalgaz-ap.firebasestorage.app',
+    measurementId: 'G-6DFSMN02PC',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDeg8rpMc-6zz6_u8RUKwVEYi0IaDBIy8A',
-    appId: '1:728108401732:android:bf91a19a2c8f821b35a811',
-    messagingSenderId: '728108401732',
-    projectId: 'dogalgaz-app',
-    storageBucket: 'dogalgaz-app.firebasestorage.app',
+    apiKey: 'AIzaSyBl5X8oT7IejEvMORv2F4XxEzX3snvqnGM',
+    appId: '1:277725838519:android:17d68ae6371ce316026132',
+    messagingSenderId: '277725838519',
+    projectId: 'dogalgaz-ap',
+    storageBucket: 'dogalgaz-ap.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCf3Bo-2QlUFj3RyM3DTy3N0AgT9IDh-Wc',
-    appId: '1:728108401732:ios:8f435649bae257f835a811',
-    messagingSenderId: '728108401732',
-    projectId: 'dogalgaz-app',
-    storageBucket: 'dogalgaz-app.firebasestorage.app',
+    apiKey: 'AIzaSyAAdwuUySfbfi2OqruhbJO9XsDsWSumY5g',
+    appId: '1:277725838519:ios:52fc52f62eb5447b026132',
+    messagingSenderId: '277725838519',
+    projectId: 'dogalgaz-ap',
+    storageBucket: 'dogalgaz-ap.firebasestorage.app',
     iosBundleId: 'com.example.dogalgazz',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCf3Bo-2QlUFj3RyM3DTy3N0AgT9IDh-Wc',
-    appId: '1:728108401732:ios:8f435649bae257f835a811',
-    messagingSenderId: '728108401732',
-    projectId: 'dogalgaz-app',
-    storageBucket: 'dogalgaz-app.firebasestorage.app',
+    apiKey: 'AIzaSyAAdwuUySfbfi2OqruhbJO9XsDsWSumY5g',
+    appId: '1:277725838519:ios:52fc52f62eb5447b026132',
+    messagingSenderId: '277725838519',
+    projectId: 'dogalgaz-ap',
+    storageBucket: 'dogalgaz-ap.firebasestorage.app',
     iosBundleId: 'com.example.dogalgazz',
   );
-
   static const FirebaseOptions linux = FirebaseOptions(
     apiKey: 'AIzaSyCaKcPcRXMS-nOrlemCqfQSmHkJcN9OAa0',
     appId: '1:728108401732:web:dad0f0060f3a8d8535a811',
@@ -84,12 +81,12 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCaKcPcRXMS-nOrlemCqfQSmHkJcN9OAa0',
-    appId: '1:728108401732:web:dad0f0060f3a8d8535a811',
-    messagingSenderId: '728108401732',
-    projectId: 'dogalgaz-app',
-    authDomain: 'dogalgaz-app.firebaseapp.com',
-    storageBucket: 'dogalgaz-app.firebasestorage.app',
-    measurementId: 'G-NCNBFMW4PJ',
+    apiKey: 'AIzaSyBW6vdvzLbpP4LOhTZB6YcquiDci3Qd_aI',
+    appId: '1:277725838519:web:2d5821158c8e3819026132',
+    messagingSenderId: '277725838519',
+    projectId: 'dogalgaz-ap',
+    authDomain: 'dogalgaz-ap.firebaseapp.com',
+    storageBucket: 'dogalgaz-ap.firebasestorage.app',
+    measurementId: 'G-7E7JQF00TR',
   );
 }

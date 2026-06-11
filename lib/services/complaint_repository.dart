@@ -16,16 +16,18 @@ class ComplaintRepository {
     if (!isReady) {
       return Stream.value(const []);
     }
-    return _collection.where('userId', isEqualTo: userId).snapshots().map(
-      (snapshot) {
-        final complaints =
-            snapshot.docs.map(Complaint.fromDoc).toList(growable: false);
-        complaints.sort(
-          (a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
-        );
-        return complaints;
-      },
-    );
+    return _collection.where('userId', isEqualTo: userId).snapshots().map((
+      snapshot,
+    ) {
+      final complaints = snapshot.docs
+          .map(Complaint.fromDoc)
+          .toList(growable: false);
+      complaints.sort(
+        (a, b) =>
+            (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
+      );
+      return complaints;
+    });
   }
 
   Stream<List<Complaint>> watchAllComplaints({
@@ -36,14 +38,18 @@ class ComplaintRepository {
       return Stream.value(const []);
     }
     return _collection.snapshots().map((snapshot) {
-      var complaints = snapshot.docs.map(Complaint.fromDoc).toList(growable: false);
+      var complaints = snapshot.docs
+          .map(Complaint.fromDoc)
+          .toList(growable: false);
       complaints.sort(
-        (a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
+        (a, b) =>
+            (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
       );
 
       if (statusFilter != null) {
-        complaints =
-            complaints.where((item) => item.status == statusFilter).toList();
+        complaints = complaints
+            .where((item) => item.status == statusFilter)
+            .toList();
       }
 
       final normalized = search.trim().toLowerCase();
@@ -87,20 +93,22 @@ class ComplaintRepository {
     await _collection.doc(complaintId).update({
       'status': status.name,
       'adminNote': adminNote,
-      if (pdfUrl != null) 'pdfUrl': pdfUrl,
-      if (pdfName != null) 'pdfName': pdfName,
+      // ignore: use_null_aware_elements
+      if (pdfUrl case final url?) 'pdfUrl': url,
+      // ignore: use_null_aware_elements
+      if (pdfName case final name?) 'pdfName': name,
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
   Future<Map<ComplaintStatus, int>> statusCounts() async {
     final snapshot = await _collection.get();
-    final counts = {
-      for (final status in ComplaintStatus.values) status: 0,
-    };
+    final counts = {for (final status in ComplaintStatus.values) status: 0};
 
     for (final doc in snapshot.docs) {
-      final status = ComplaintStatusX.fromString(doc.data()['status'] as String?);
+      final status = ComplaintStatusX.fromString(
+        doc.data()['status'] as String?,
+      );
       counts[status] = (counts[status] ?? 0) + 1;
     }
 

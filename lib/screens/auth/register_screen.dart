@@ -105,10 +105,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'Ad soyad',
                     prefixIcon: Icon(Icons.person_outline),
                   ),
-                  validator: (value) =>
-                      value == null || value.trim().isEmpty
-                          ? 'Ad soyad giriniz.'
-                          : null,
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Ad soyad giriniz.'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -120,8 +119,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   validator: (value) =>
                       value == null || value.trim().length < 10
-                          ? 'Geçerli telefon giriniz.'
-                          : null,
+                      ? 'Geçerli telefon giriniz.'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -131,10 +130,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'E-posta',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (value) =>
-                      value == null || !value.contains('@')
-                          ? 'Geçerli e-posta giriniz.'
-                          : null,
+                  validator: (value) => value == null || !value.contains('@')
+                      ? 'Geçerli e-posta giriniz.'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -144,10 +142,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'Şifre',
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
-                  validator: (value) =>
-                      value == null || value.length < 6
-                          ? 'Şifre en az 6 karakter olmalı.'
-                          : null,
+                  validator: (value) => value == null || value.length < 6
+                      ? 'Şifre en az 6 karakter olmalı.'
+                      : null,
                 ),
                 const SizedBox(height: 20),
                 SizedBox(

@@ -2,11 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
-  AuthService({
-    FirebaseAuth? auth,
-    FirebaseFirestore? firestore,
-  })  : _auth = auth,
-        _firestore = firestore;
+  AuthService({FirebaseAuth? auth, FirebaseFirestore? firestore})
+    : _auth = auth,
+      _firestore = firestore;
 
   final FirebaseAuth? _auth;
   final FirebaseFirestore? _firestore;
@@ -52,10 +50,7 @@ class AuthService {
     await credential.user?.sendEmailVerification();
   }
 
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     _ensureReady();
     await _auth!.signInWithEmailAndPassword(
       email: email.trim(),
@@ -70,7 +65,7 @@ class AuthService {
       return true;
     }
 
-    final userDoc = await _firestore!.collection('users').doc(uid).get();
+    final userDoc = await _firestore.collection('users').doc(uid).get();
     return userDoc.data()?['role'] == 'admin';
   }
 

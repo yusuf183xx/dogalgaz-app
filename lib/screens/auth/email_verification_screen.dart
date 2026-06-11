@@ -9,7 +9,8 @@ class EmailVerificationScreen extends StatefulWidget {
   final AppServices services;
 
   @override
-  State<EmailVerificationScreen> createState() => _EmailVerificationScreenState();
+  State<EmailVerificationScreen> createState() =>
+      _EmailVerificationScreenState();
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
@@ -59,7 +60,11 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.mark_email_unread_outlined, size: 56, color: appBlue),
+            const Icon(
+              Icons.mark_email_unread_outlined,
+              size: 56,
+              color: appBlue,
+            ),
             const SizedBox(height: 16),
             const Text(
               'E-postanızı doğrulayın',

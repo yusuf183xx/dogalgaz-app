@@ -105,7 +105,7 @@ class MyComplaintsScreen extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: complaints.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               return ComplaintCard(complaint: complaints[index]);
             },
@@ -148,7 +148,10 @@ class ComplaintCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(dateText, style: const TextStyle(color: appMuted, fontSize: 12)),
+            Text(
+              dateText,
+              style: const TextStyle(color: appMuted, fontSize: 12),
+            ),
             const SizedBox(height: 10),
             Text('Tespit: ${complaint.detectedIssue}'),
             const SizedBox(height: 4),

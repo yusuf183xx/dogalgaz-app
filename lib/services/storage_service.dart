@@ -21,10 +21,7 @@ class StorageService {
     final path = '$folder/${DateTime.now().millisecondsSinceEpoch}_$safeName';
     final ref = _storage!.ref().child(path);
 
-    await ref.putData(
-      bytes,
-      SettableMetadata(contentType: 'application/pdf'),
-    );
+    await ref.putData(bytes, SettableMetadata(contentType: 'application/pdf'));
 
     final url = await ref.getDownloadURL();
     return (url: url, name: safeName);

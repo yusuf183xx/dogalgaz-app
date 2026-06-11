@@ -117,7 +117,8 @@ FaultDiagnosis diagnoseFault(Set<String> selectedSymptomIds) {
   final serviceScores = <String, int>{};
 
   for (final symptom in selected) {
-    issueScores[symptom.issue] = (issueScores[symptom.issue] ?? 0) + symptom.weight;
+    issueScores[symptom.issue] =
+        (issueScores[symptom.issue] ?? 0) + symptom.weight;
     serviceScores[symptom.service] =
         (serviceScores[symptom.service] ?? 0) + symptom.weight;
   }

@@ -29,7 +29,10 @@ Future<void> main() async {
   final quoteRepository = await QuoteRepositoryFactory.create();
   final firestore = firebaseReady ? FirebaseFirestore.instance : null;
   final auth = firebaseReady ? FirebaseAuth.instance : null;
-  if (firebaseReady && auth != null && firestore != null) {
+  if (firebaseReady &&
+      auth != null &&
+      firestore != null &&
+      auth.currentUser == null) {
     await AdminBootstrap.ensureAdminAccount(auth: auth, firestore: firestore);
   }
   final services = AppServices(
@@ -46,10 +49,7 @@ Future<void> main() async {
 }
 
 class CamliDogalgazApp extends StatelessWidget {
-  const CamliDogalgazApp({
-    super.key,
-    required this.services,
-  });
+  const CamliDogalgazApp({super.key, required this.services});
 
   final AppServices services;
 
@@ -97,10 +97,7 @@ class AppRoot extends StatelessWidget {
 }
 
 class MainShell extends StatefulWidget {
-  const MainShell({
-    super.key,
-    required this.services,
-  });
+  const MainShell({super.key, required this.services});
 
   final AppServices services;
 
@@ -151,10 +148,7 @@ class _MainShellState extends State<MainShell> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 16,
-        title: const BrandTitle(),
-      ),
+      appBar: AppBar(titleSpacing: 16, title: const BrandTitle()),
       body: Column(
         children: [
           if (!widget.services.authService.isReady)
@@ -216,10 +210,7 @@ class _MainShellState extends State<MainShell> {
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({
-    super.key,
-    required this.onNavigateToQuote,
-  });
+  const HomeScreen({super.key, required this.onNavigateToQuote});
 
   final VoidCallback onNavigateToQuote;
 
@@ -242,24 +233,22 @@ class HomeScreen extends StatelessWidget {
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children:
-                quickProblems
-                    .map((problem) => ProblemCard(problem: problem))
-                    .toList(),
+            children: quickProblems
+                .map((problem) => ProblemCard(problem: problem))
+                .toList(),
           ),
           const SizedBox(height: 28),
           Row(
-            children:
-                stats
-                    .map(
-                      (stat) => Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: MetricCard(stat: stat),
-                        ),
-                      ),
-                    )
-                    .toList(),
+            children: stats
+                .map(
+                  (stat) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: MetricCard(stat: stat),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
           const SizedBox(height: 28),
           const SectionTitle(
@@ -269,7 +258,9 @@ class HomeScreen extends StatelessWidget {
                 'Doğalgaz tesisatı, kombi bakımı, petek temizliği ve toplu blok işlerinde mobilde daha net anlatım.',
           ),
           const SizedBox(height: 16),
-          ...services.take(4).map(
+          ...services
+              .take(4)
+              .map(
                 (service) => Padding(
                   padding: const EdgeInsets.only(bottom: 14),
                   child: ServicePreviewCard(service: service),
@@ -286,11 +277,11 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ...reviews.map(
-                (review) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: ReviewCard(review: review),
-                ),
-              ),
+            (review) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: ReviewCard(review: review),
+            ),
+          ),
         ],
       ),
     );
@@ -307,14 +298,16 @@ class ServicesScreen extends StatelessWidget {
       children: [
         Text(
           'Hizmetler',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 6),
         Text(
           'Maraş ve yakın illerde sunduğumuz hizmetler.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: appMuted),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: appMuted),
         ),
         const SizedBox(height: 18),
         ...services.map(
@@ -387,7 +380,9 @@ class _QuoteScreenState extends State<QuoteScreen> {
       unitCount: unitCount,
     );
     if (bulkError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(bulkError)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(bulkError)));
       return;
     }
 
@@ -415,9 +410,9 @@ class _QuoteScreenState extends State<QuoteScreen> {
     }
 
     setState(() => _isSubmitting = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.userMessage)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(result.userMessage)));
     _noteController.clear();
   }
 
@@ -443,7 +438,9 @@ class _QuoteScreenState extends State<QuoteScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'Talebiniz admin paneline düşer, cevap uygulama üzerinden gelir.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: appMuted),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: appMuted),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -452,8 +449,9 @@ class _QuoteScreenState extends State<QuoteScreen> {
                       labelText: 'Ad soyad',
                       prefixIcon: Icon(Icons.person_outline),
                     ),
-                    validator: (value) =>
-                        value == null || value.trim().isEmpty ? 'Ad soyad giriniz.' : null,
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? 'Ad soyad giriniz.'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -465,15 +463,17 @@ class _QuoteScreenState extends State<QuoteScreen> {
                     ),
                     validator: (value) =>
                         value == null || value.trim().length < 10
-                            ? 'Geçerli telefon giriniz.'
-                            : null,
+                        ? 'Geçerli telefon giriniz.'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   LocationPicker(
                     province: _province,
                     district: _district,
-                    onProvinceChanged: (value) => setState(() => _province = value),
-                    onDistrictChanged: (value) => setState(() => _district = value),
+                    onProvinceChanged: (value) =>
+                        setState(() => _province = value),
+                    onDistrictChanged: (value) =>
+                        setState(() => _district = value),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
@@ -490,7 +490,8 @@ class _QuoteScreenState extends State<QuoteScreen> {
                           ),
                         )
                         .toList(),
-                    onChanged: (value) => setState(() => _service = value ?? _service),
+                    onChanged: (value) =>
+                        setState(() => _service = value ?? _service),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
@@ -501,8 +502,14 @@ class _QuoteScreenState extends State<QuoteScreen> {
                     ),
                     items: const [
                       DropdownMenuItem(value: 'Daire', child: Text('Daire')),
-                      DropdownMenuItem(value: 'Müstakil ev', child: Text('Müstakil ev')),
-                      DropdownMenuItem(value: 'Is yeri', child: Text('Is yeri')),
+                      DropdownMenuItem(
+                        value: 'Müstakil ev',
+                        child: Text('Müstakil ev'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Is yeri',
+                        child: Text('Is yeri'),
+                      ),
                       DropdownMenuItem(
                         value: 'Apartman / blok',
                         child: Text('Apartman / blok'),
@@ -540,15 +547,25 @@ class _QuoteScreenState extends State<QuoteScreen> {
                       prefixIcon: Icon(Icons.schedule_outlined),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'Bugün mümkünse', child: Text('Bugün mümkünse')),
-                      DropdownMenuItem(value: 'Bu hafta içinde', child: Text('Bu hafta içinde')),
-                      DropdownMenuItem(value: 'Bu ay içinde', child: Text('Bu ay içinde')),
+                      DropdownMenuItem(
+                        value: 'Bugün mümkünse',
+                        child: Text('Bugün mümkünse'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Bu hafta içinde',
+                        child: Text('Bu hafta içinde'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Bu ay içinde',
+                        child: Text('Bu ay içinde'),
+                      ),
                       DropdownMenuItem(
                         value: 'Sadece bilgi almak istiyorum',
                         child: Text('Sadece bilgi almak istiyorum'),
                       ),
                     ],
-                    onChanged: (value) => setState(() => _urgency = value ?? _urgency),
+                    onChanged: (value) =>
+                        setState(() => _urgency = value ?? _urgency),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -577,7 +594,9 @@ class _QuoteScreenState extends State<QuoteScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.send_outlined),
-                      label: Text(_isSubmitting ? 'Gönderiliyor...' : 'Teklifi Gönder'),
+                      label: Text(
+                        _isSubmitting ? 'Gönderiliyor...' : 'Teklifi Gönder',
+                      ),
                     ),
                   ),
                 ],
@@ -606,11 +625,11 @@ class TrustScreen extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         ...reasons.map(
-              (reason) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: ReasonCard(reason: reason),
-              ),
-            ),
+          (reason) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: ReasonCard(reason: reason),
+          ),
+        ),
         const SizedBox(height: 16),
         Card(
           child: Padding(
@@ -620,21 +639,21 @@ class TrustScreen extends StatelessWidget {
               children: [
                 Text(
                   'Nasıl çalışıyoruz?',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 14),
                 ...processSteps.asMap().entries.map(
-                      (entry) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: ProcessTile(
-                          stepNumber: entry.key + 1,
-                          title: entry.value.title,
-                          description: entry.value.description,
-                        ),
-                      ),
+                  (entry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: ProcessTile(
+                      stepNumber: entry.key + 1,
+                      title: entry.value.title,
+                      description: entry.value.description,
                     ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -666,9 +685,9 @@ class BrandTitle extends StatelessWidget {
           children: [
             Text(
               'Çamlı Doğalgaz',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             Text(
               'Servis Uygulaması',
@@ -1115,9 +1134,10 @@ class ServicePreviewCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     service.summary,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: appMuted, height: 1.5),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: appMuted,
+                      height: 1.5,
+                    ),
                   ),
                 ],
               ),
@@ -1146,10 +1166,7 @@ class DetailedServiceCard extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  appPrimary.withValues(alpha: 0.28),
-                  appSurface,
-                ],
+                colors: [appPrimary.withValues(alpha: 0.28), appSurface],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -1185,38 +1202,39 @@ class DetailedServiceCard extends StatelessWidget {
                 const SizedBox(height: 14),
                 Text(
                   service.description,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: appMuted, height: 1.6),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: appMuted,
+                    height: 1.6,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 ...service.bullets.map(
-                      (bullet) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 9,
-                              height: 9,
-                              margin: const EdgeInsets.only(top: 7),
-                              decoration: const BoxDecoration(
-                                color: appAccent,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                bullet,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: appMuted, height: 1.5),
-                              ),
-                            ),
-                          ],
+                  (bullet) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 9,
+                          height: 9,
+                          margin: const EdgeInsets.only(top: 7),
+                          decoration: const BoxDecoration(
+                            color: appAccent,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            bullet,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: appMuted, height: 1.5),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -1227,10 +1245,7 @@ class DetailedServiceCard extends StatelessWidget {
 }
 
 class QuotePromptCard extends StatelessWidget {
-  const QuotePromptCard({
-    super.key,
-    required this.onNavigateToQuote,
-  });
+  const QuotePromptCard({super.key, required this.onNavigateToQuote});
 
   final VoidCallback onNavigateToQuote;
 
@@ -1303,10 +1318,9 @@ class FirebaseStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background =
-        repository.cloudEnabled
-            ? const Color(0x141FA463)
-            : const Color(0x14E8A33B);
+    final background = repository.cloudEnabled
+        ? const Color(0x141FA463)
+        : const Color(0x14E8A33B);
     final accentColor = repository.cloudEnabled ? appWhatsApp : appAccent;
 
     return Card(
@@ -1514,16 +1528,17 @@ class ReasonCard extends StatelessWidget {
                 children: [
                   Text(
                     reason.title,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     reason.description,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: appMuted, height: 1.5),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: appMuted,
+                      height: 1.5,
+                    ),
                   ),
                 ],
               ),
@@ -1562,10 +1577,7 @@ class ProcessTile extends StatelessWidget {
           ),
           child: Text(
             '$stepNumber',
-            style: const TextStyle(
-              color: appBlue,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(color: appBlue, fontWeight: FontWeight.w800),
           ),
         ),
         const SizedBox(width: 12),
@@ -1698,10 +1710,7 @@ class ReasonItem {
 }
 
 class ProcessStep {
-  const ProcessStep({
-    required this.title,
-    required this.description,
-  });
+  const ProcessStep({required this.title, required this.description});
 
   final String title;
   final String description;

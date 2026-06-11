@@ -93,10 +93,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelText: 'E-posta',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (value) =>
-                      value == null || !value.contains('@')
-                          ? 'Geçerli e-posta giriniz.'
-                          : null,
+                  validator: (value) => value == null || !value.contains('@')
+                      ? 'Geçerli e-posta giriniz.'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -106,10 +105,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelText: 'Şifre',
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
-                  validator: (value) =>
-                      value == null || value.length < 6
-                          ? 'Şifre en az 6 karakter olmalı.'
-                          : null,
+                  validator: (value) => value == null || value.length < 6
+                      ? 'Şifre en az 6 karakter olmalı.'
+                      : null,
                 ),
                 Align(
                   alignment: Alignment.centerRight,

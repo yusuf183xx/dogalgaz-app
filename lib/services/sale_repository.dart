@@ -17,7 +17,9 @@ class SaleRepository {
       return Stream.value(const []);
     }
     return _collection.snapshots().map((snapshot) {
-      final sales = snapshot.docs.map(SaleRecord.fromDoc).toList(growable: false);
+      final sales = snapshot.docs
+          .map(SaleRecord.fromDoc)
+          .toList(growable: false);
       sales.sort(
         (a, b) => (b.soldAt ?? DateTime(0)).compareTo(a.soldAt ?? DateTime(0)),
       );

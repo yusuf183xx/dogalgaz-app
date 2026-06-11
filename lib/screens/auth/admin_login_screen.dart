@@ -59,7 +59,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         await widget.services.authService.signOut();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Bu hesap admin yetkisine sahip değil.')),
+            const SnackBar(
+              content: Text('Bu hesap admin yetkisine sahip değil.'),
+            ),
           );
         }
         return;
@@ -139,10 +141,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     labelText: 'Admin e-posta',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (value) =>
-                      value == null || !value.contains('@')
-                          ? 'Geçerli e-posta giriniz.'
-                          : null,
+                  validator: (value) => value == null || !value.contains('@')
+                      ? 'Geçerli e-posta giriniz.'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -152,10 +153,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     labelText: 'Şifre',
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
-                  validator: (value) =>
-                      value == null || value.length < 6
-                          ? 'Şifre en az 6 karakter olmalı.'
-                          : null,
+                  validator: (value) => value == null || value.length < 6
+                      ? 'Şifre en az 6 karakter olmalı.'
+                      : null,
                 ),
                 Align(
                   alignment: Alignment.centerRight,

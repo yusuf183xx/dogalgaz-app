@@ -24,7 +24,8 @@ class QuoteLeadRepository {
     return _collection.snapshots().map((snapshot) {
       var leads = snapshot.docs.map(QuoteLead.fromDoc).toList(growable: false);
       leads.sort(
-        (a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
+        (a, b) =>
+            (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
       );
 
       if (statusFilter != null) {
@@ -53,15 +54,18 @@ class QuoteLeadRepository {
       return Stream.value(const []);
     }
 
-    return _collection.where('userId', isEqualTo: userId).snapshots().map(
-      (snapshot) {
-        final leads = snapshot.docs.map(QuoteLead.fromDoc).toList(growable: false);
-        leads.sort(
-          (a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
-        );
-        return leads;
-      },
-    );
+    return _collection.where('userId', isEqualTo: userId).snapshots().map((
+      snapshot,
+    ) {
+      final leads = snapshot.docs
+          .map(QuoteLead.fromDoc)
+          .toList(growable: false);
+      leads.sort(
+        (a, b) =>
+            (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
+      );
+      return leads;
+    });
   }
 
   Future<void> updateLead({
